@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "omeWfKXE+v0DFMQI9SraWumd2gWa4dyMsVE7ArqKT5KQV6Mytr5rMn3eCZ6eBlDnrqFVqa3DLvzabHnvDbZ4YQ==",
+  "success": true,
+  "projectFilePath": "D:\\БГУИР\\3 курс\\6 семестр\\МиАПР\\Лабораторные\\Лаба3\\DMMaA_LAB_3\\DMMaA_LAB_3.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\Lenovo\\.nuget\\packages\\microsoft.netcore.app.host.win-x64\\3.1.31\\microsoft.netcore.app.host.win-x64.3.1.31.nupkg.sha512"
+  ],
+  "logs": []
+}

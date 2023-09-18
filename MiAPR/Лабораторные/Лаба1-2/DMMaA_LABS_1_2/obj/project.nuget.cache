@@ -1,0 +1,13 @@
+{
+  "version": 2,
+  "dgSpecHash": "M9+EwIuwor9e4ZUBRNeXhS2CGrewyEdHqyDGx+bTDkUmqSSt1ZBV+IPi2HiUVjph65QRMrnmlAZuxXROe0v4sQ==",
+  "success": true,
+  "projectFilePath": "D:\\Labs\\semester_5\\MiAPR\\Лабораторные\\Лаба1-2\\DMMaA_LABS_1_2\\DMMaA_LABS_1_2.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\baran\\.nuget\\packages\\microsoft.windowsdesktop.app.ref\\3.1.0\\microsoft.windowsdesktop.app.ref.3.1.0.nupkg.sha512",
+    "C:\\Users\\baran\\.nuget\\packages\\microsoft.netcore.app.ref\\3.1.0\\microsoft.netcore.app.ref.3.1.0.nupkg.sha512",
+    "C:\\Users\\baran\\.nuget\\packages\\microsoft.aspnetcore.app.ref\\3.1.10\\microsoft.aspnetcore.app.ref.3.1.10.nupkg.sha512",
+    "C:\\Users\\baran\\.nuget\\packages\\microsoft.netcore.app.host.win-x64\\3.1.32\\microsoft.netcore.app.host.win-x64.3.1.32.nupkg.sha512"
+  ],
+  "logs": []
+}
