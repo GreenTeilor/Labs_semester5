@@ -11,22 +11,30 @@ if len(sys.argv) != 4 or not sys.argv[3].replace(".", "", 1).isdigit():
     print('invalid parameters: python ' + sys.argv[0] + ' name1.npy name2.npy P(C1)')
     exit()
 
-data1 = np.random.normal(float(0), float(1.0), 1000)
-data2 = np.random.normal(float(0), float(5.0), 1000)
+# Generate two arrays with random values that correspond to normal distribution(два массива, значения которого
+# подчиняются нормальному распределению)
+data1 = np.random.normal(float(5.0), float(1.5), 1000)
+data2 = np.random.normal(float(0.3), float(3.0), 1000)
 # data1, data2 = np.load((sys.argv[1], False), np.load(sys.argv[2], False))
 
+# Calculate mean value and standard deviation of random variables(мат ожидание и среднеквадратичное отклонение)
 mu1, sigma1 = np.mean(data1), np.std(data1)
 mu2, sigma2 = np.mean(data2), np.std(data2)
 
-pc1 = float(0.1)
+# Chance of point to be in first class - 0.53, in second - 0.47
+pc1 = float(0.53)
 pc2 = 1 - pc1
 
+# Array of min and max value from data arrays
 range = (min(np.min(data1), np.min(data2)), max(np.max(data1), np.max(data2)))
 
+# Generate 10000 evenly spaced values in range [range[0], range[1](Генерация 10000 равномерно распределенных значений)
 x = np.linspace(range[0], range[1], 10000)
 
-pxc1, pxc2 = stats.norm.pdf(x, mu1, sigma1), stats.norm.pdf(x, mu2, sigma2)
+# Функции плотности вероятности
+pxc1, pxc2 = stats.norm.pdf(x, mu1, sigma1), stats.norm.pdf(x, mu2, sigma2) # ЭТО МАССИВ!!!
 
+#Числитель формулы Байеса
 y1, y2 = pxc1 * pc1, pxc2 * pc2
 
 y1_max, y2_max = np.argmax(y1), np.argmax(y2)
