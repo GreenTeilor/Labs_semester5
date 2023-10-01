@@ -153,7 +153,7 @@ namespace Laba4
         private void ChangeWeight(PerceptronObject weight, PerceptronObject perceptronObject, int sign)
         {
             for (int i = 0; i < weight.attributes.Count; i++)
-                weight.attributes[i] += sign * perceptronObject.attributes[i];
+                weight.attributes[i] += C*sign * perceptronObject.attributes[i];
         }
 
         public void FillListBox(ListBox listBoxClasses, ListBox listBoxFunc)
@@ -170,7 +170,7 @@ namespace Laba4
                 listBoxClasses.Items.Add(String.Format("Класс {0}:", indexCurrentClass));
                 foreach (PerceptronObject currentObject in currClass.objects)
                 {
-                    string str = String.Format("    Объект {0}: (", indexCurrentObject);
+                    string str = String.Format("    Образ {0}: (", indexCurrentObject);
 
                     for (int j = 0; j < currentObject.attributes.Count - 1; j++)
                     {
@@ -216,11 +216,11 @@ namespace Laba4
             int decisionMax;
 
             perceptronObject.attributes.Add(1);
-            decisionMax = ObjectMultiplication(weights[0], perceptronObject);
+            decisionMax = ObjectMultiplication(decisionFunctions[0], perceptronObject);
 
-            for (int i = 1; i < weights.Count; i++)
+            for (int i = 1; i < decisionFunctions.Count; i++)
             {
-                PerceptronObject weight = weights[i];
+                PerceptronObject weight = decisionFunctions[i];
 
                 if (ObjectMultiplication(weight, perceptronObject) > decisionMax)
                 {
