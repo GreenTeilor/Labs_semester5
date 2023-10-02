@@ -22,7 +22,7 @@ mu1, sigma1 = np.mean(data1), np.std(data1)
 mu2, sigma2 = np.mean(data2), np.std(data2)
 
 # Chance of point to be in first class - 0.53, in second - 0.47
-pc1 = float(0.53)
+pc1 = float(0.42)
 pc2 = 1 - pc1
 
 # Array of min and max value from data arrays
@@ -65,7 +65,7 @@ plt.plot(x, y1)
 plt.plot(x, y2)
 plt.scatter(x[intersection], y1[intersection], color="black")
 # plt.xlabel("False alert (khaki): {false_alert:.{4}f} Warning skip (pink): {detection_skip:.{4}f} Classification error: {classification_error:.{4}f}")
-plt.xlabel("False alert (khaki): " + format(false_alert, '.4f') + " Warning skip (pink): " + format(detection_skip,
-                                                                                                    '.4f') + " Classification error: " + format(
-    classification_error, '.4f'), fontsize=18)
+plt.xlabel("Зона ложной тревоги (хаки): " + format(false_alert, '.4f') + " Зона пропуска обнаружения (розовый): " + format(detection_skip,
+                                                                                                    '.4f') + " Ошибка классификации: " + format(
+    classification_error, '.4f'), fontsize=16)
 plt.show()
