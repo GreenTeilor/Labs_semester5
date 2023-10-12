@@ -53,16 +53,17 @@
             this.dataGridView.Location = new System.Drawing.Point(12, 58);
             this.dataGridView.Name = "dataGridView";
             this.dataGridView.RowHeadersVisible = false;
-            this.dataGridView.Size = new System.Drawing.Size(364, 331);
+            this.dataGridView.RowHeadersWidth = 51;
+            this.dataGridView.Size = new System.Drawing.Size(480, 461);
             this.dataGridView.TabIndex = 0;
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(140, 444);
+            this.button1.Location = new System.Drawing.Point(637, 444);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(236, 78);
             this.button1.TabIndex = 3;
-            this.button1.Text = "Выполнить классификацию объектов";
+            this.button1.Text = "Классифицировать\r\n";
             this.button1.UseVisualStyleBackColor = true;
             this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
@@ -79,25 +80,25 @@
             series1.Legend = "Legend1";
             series1.Name = "Series1";
             this.chart1.Series.Add(series1);
-            this.chart1.Size = new System.Drawing.Size(598, 504);
+            this.chart1.Size = new System.Drawing.Size(598, 371);
             this.chart1.TabIndex = 4;
             this.chart1.Text = "chart1";
             // 
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(43, 21);
+            this.label1.Location = new System.Drawing.Point(12, 21);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(201, 22);
+            this.label1.Size = new System.Drawing.Size(253, 28);
             this.label1.TabIndex = 5;
             this.label1.Text = "Количество объектов:";
             // 
             // radioBtnMaximum
             // 
             this.radioBtnMaximum.AutoSize = true;
-            this.radioBtnMaximum.Location = new System.Drawing.Point(36, 487);
+            this.radioBtnMaximum.Location = new System.Drawing.Point(533, 487);
             this.radioBtnMaximum.Name = "radioBtnMaximum";
-            this.radioBtnMaximum.Size = new System.Drawing.Size(65, 26);
+            this.radioBtnMaximum.Size = new System.Drawing.Size(78, 32);
             this.radioBtnMaximum.TabIndex = 1;
             this.radioBtnMaximum.TabStop = true;
             this.radioBtnMaximum.Text = "Max";
@@ -107,9 +108,9 @@
             // 
             this.radioBtnMinimum.AutoSize = true;
             this.radioBtnMinimum.Checked = true;
-            this.radioBtnMinimum.Location = new System.Drawing.Point(36, 444);
+            this.radioBtnMinimum.Location = new System.Drawing.Point(533, 444);
             this.radioBtnMinimum.Name = "radioBtnMinimum";
-            this.radioBtnMinimum.Size = new System.Drawing.Size(62, 26);
+            this.radioBtnMinimum.Size = new System.Drawing.Size(74, 32);
             this.radioBtnMinimum.TabIndex = 0;
             this.radioBtnMinimum.TabStop = true;
             this.radioBtnMinimum.Text = "Min";
@@ -118,17 +119,17 @@
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(12, 410);
+            this.label2.Location = new System.Drawing.Point(528, 402);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(246, 22);
+            this.label2.Size = new System.Drawing.Size(128, 28);
             this.label2.TabIndex = 6;
-            this.label2.Text = "Критерий классификации:";
+            this.label2.Text = "Критерий:";
             // 
             // textBox1
             // 
-            this.textBox1.Location = new System.Drawing.Point(271, 18);
+            this.textBox1.Location = new System.Drawing.Point(285, 14);
             this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(71, 29);
+            this.textBox1.Size = new System.Drawing.Size(71, 35);
             this.textBox1.TabIndex = 7;
             this.textBox1.Text = "4";
             this.textBox1.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.textBox1_KeyPress);
@@ -136,7 +137,7 @@
             // Form1
             // 
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
-            this.BackColor = System.Drawing.SystemColors.ActiveCaption;
+            this.BackColor = System.Drawing.SystemColors.ButtonFace;
             this.ClientSize = new System.Drawing.Size(1119, 534);
             this.Controls.Add(this.textBox1);
             this.Controls.Add(this.label2);

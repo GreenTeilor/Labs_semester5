@@ -8,12 +8,13 @@ namespace MIAPR_6
     {
         private readonly List<Color> colors = new List<Color>
         {
-            Color.Red, Color.Blue, Color.DodgerBlue, Color.DarkMagenta, Color.BlueViolet,
-            Color.DeepPink,Color.Firebrick,Color.ForestGreen,Color.MidnightBlue, Color.Green,
+            Color.Green, Color.Red, Color.Violet,  Color.Gold,
+            Color.Yellow, Color.LightCyan, Color.LightBlue, Color.Turquoise, Color.Blue, 
+            Color.DodgerBlue, Color.DarkMagenta, Color.BlueViolet,
+            Color.DeepPink,Color.Firebrick,Color.ForestGreen,Color.MidnightBlue,
             Color.Aqua, Color.DarkOrchid, Color.RoyalBlue, Color.DarkBlue, Color.Beige,
             Color.Salmon, Color.Sienna, Color.PowderBlue,  Color.Plum, Color.LightSalmon,
-            Color.DarkOrchid, Color.Olive, Color.YellowGreen, Color.Violet,  Color.Gold,
-            Color.Yellow, Color.LightCyan, Color.LightBlue, Color.Turquoise
+            Color.DarkOrchid, Color.Olive, Color.YellowGreen
         };
 
         private readonly List<Group> groups = new List<Group>();
@@ -138,14 +139,14 @@ namespace MIAPR_6
             return (char)(ch + tempChar - 1);
         }
 
-        public void Draw(Chart chart)
+        public void Draw(Chart chart, bool isMaxChecked)
         {
-            SetDefaultChart(chart);
+            SetDefaultChart(chart, isMaxChecked);
             foreach (Group subGroup in groups)
                 DrawSubGroups(subGroup, chart);
         }
 
-        private void SetDefaultChart(Chart chart)
+        private void SetDefaultChart(Chart chart, bool isMaxChecked)
         {
             chart.Series.Clear();
             chart.ChartAreas[0].AxisX.ArrowStyle = AxisArrowStyle.Lines;
@@ -162,7 +163,7 @@ namespace MIAPR_6
             chart.ChartAreas[0].AxisY.Maximum = groups[0].Y + 0.01;
             chart.ChartAreas[0].AxisY.Minimum = 0;
             chart.ChartAreas[0].AxisY.Title = "";
-            chart.ChartAreas[0].AxisY.Interval = 1;
+            chart.ChartAreas[0].AxisY.Interval = isMaxChecked ? 0.01 : 1;
             chart.ChartAreas[0].AxisY.LineWidth = 1;
         }
 

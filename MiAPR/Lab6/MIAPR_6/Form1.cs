@@ -25,7 +25,7 @@ namespace MIAPR_6
             var hierarchical = new HierarchicalGrouping(distances, int.Parse(textBox1.Text));
 
             hierarchical.FindGroups();
-            hierarchical.Draw(chart1);
+            hierarchical.Draw(chart1, radioBtnMaximum.Checked);
         }
 
         private double[,] SetRandomGrid(int size)
@@ -58,7 +58,7 @@ namespace MIAPR_6
                 for (int i = 1; i < int.Parse(textBox1.Text); i++)
                     for (int j = 0; j < i; j++)
                     {
-                        result[i, j] = size + 6 - result[i, j];
+                        result[i, j] = 1 / result[i,j];
                         result[j, i] = result[i, j];
                     }
             }
