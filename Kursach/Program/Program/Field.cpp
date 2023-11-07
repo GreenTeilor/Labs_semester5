@@ -152,17 +152,17 @@ std::vector<Cell>& Field::operator[](const int index)
 	return m_field[index];
 }
 
-int Field::getHeight() 
+int Field::getHeight() const 
 {
 	return m_height;
 }
 
-int Field::getWidth() 
+int Field::getWidth() const
 {
 	return m_width;
 }
 
-int Field::getNumMines()
+int Field::getNumMines() const
 {
 	return m_numMines;
 }

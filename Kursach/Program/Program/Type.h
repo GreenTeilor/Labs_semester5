@@ -18,7 +18,7 @@ private:
 	{
 		{Types::BOMB, "9"},
 		{Types::BOMB_BOOM, "10"},
-		{Types::EMPTY, "11"},
+		{Types::EMPTY, "empty"},
 		{Types::CLOSED, "0"},
 		{Types::FLAG, "17"},
 		{Types::WRONG_FLAG, "17"},

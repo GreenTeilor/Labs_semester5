@@ -2,19 +2,21 @@
 #include "Program.h"
 #include <map>
 #include <string>
+#include <stdlib.h>
 #include "Const.h"
 #include "Field.h"
+#include "DrawableField.h"
 
 #define MAX_LOADSTRING 100
-
-Field field{ 10, 10, 20 };
-std::vector<HWND> buttons;
 
 // Глобальные переменные:
 HINSTANCE hInst;                                // текущий экземпляр
 HWND hWnd;                                      // Дескриптор окна
 WCHAR szTitle[MAX_LOADSTRING];                  // Текст строки заголовка
 WCHAR szWindowClass[MAX_LOADSTRING];            // имя класса главного окна
+
+Field field{ 10, 10, 20 };
+DrawableField drawableField{ field, hWnd, hInst };
 
 // Отправить объявления функций, включенных в этот модуль кода:
 ATOM                MyRegisterClass(HINSTANCE hInstance);
@@ -24,7 +26,12 @@ INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    Difficulty(HWND, UINT, WPARAM, LPARAM);
 LRESULT CALLBACK fieldActions(HWND hButton, UINT message, WPARAM wParam, LPARAM lParam, 
     UINT_PTR uIdSubclass, DWORD_PTR dwRefData);
+
 void checkItem(HWND hWnd, int wmId);
+void getDesktopResolution(int& width, int& height);
+int getWindowWidth();
+int getWindowHeight();
+void changeWindowPositionAndDimension();
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
@@ -50,28 +57,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     }
 
     //Field creation
-    int buttonNumber = 0;
-    buttons.resize(10 * 10);
-    for (int i = 0; i < 10; i++)
-    {
-        for (int j = 0; j < 10; j++)
-        {
-            HWND btnHwnd = CreateWindow(L"button", L"",
-                WS_CHILD | WS_VISIBLE | BS_BITMAP | BS_NOTIFY | BS_PUSHBUTTON,
-                1 + Const::imgWidth * j, 35 + Const::imgHeight * i, Const::imgWidth, Const::imgHeight, hWnd, (HMENU)buttonNumber, hInstance, 0);
-            HBITMAP img = Const::images.at(Type::Types::CLOSED);
-            SendMessage(btnHwnd, BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)img);
-
-            if (!SetWindowSubclass(GetDlgItem(hWnd, buttonNumber), fieldActions, 0, buttonNumber))
-            {
-                DestroyWindow(hWnd);
-            }
-
-            buttons[buttonNumber] = btnHwnd;
-
-            buttonNumber++;
-        }
-    }
+    drawableField.update(true, fieldActions);
+    changeWindowPositionAndDimension();
 
     HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_PROGRAM));
 
@@ -172,54 +159,29 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
                 //HERE CODE ON NEW GAME CREATION!!!
                 field.generate(field.getWidth(), field.getHeight(), field.getNumMines());
-                for (int i = 0; i < field.getHeight(); ++i)
-                {
-                    for (int j = 0; j < field.getWidth(); ++j)
-                    {
-                        SendMessage(buttons[i * field.getWidth() + j], BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)Const::images.at(field[i][j].getType()));
-                    }
-                }
+                drawableField.update(false, fieldActions);
+                changeWindowPositionAndDimension();
                 /*====================================*/
                 break;
             case IDM_DIFFICULTY_EASY:
                 //Code to set easy difficulty
-                for (auto& btn : buttons)
-                {
-                    DestroyWindow(btn);
-                }
-                buttons.clear();
                 field.generate(20, 20, 40);
-                buttons.resize(field.getWidth() * field.getHeight());
-                
-                for (int i = 0; i < 20; i++)
-                {
-                    for (int j = 0; j < 20; j++)
-                    {
-                        HWND btnHwnd = CreateWindow(L"button", L"",
-                            WS_CHILD | WS_VISIBLE | BS_BITMAP | BS_NOTIFY | BS_PUSHBUTTON,
-                            1 + Const::imgWidth * j, 35 + Const::imgHeight * i, Const::imgWidth, Const::imgHeight, hWnd, (HMENU)buttonNumber, hInst, 0);
-                        HBITMAP img = Const::images.at(Type::Types::CLOSED);
-                        SendMessage(btnHwnd, BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)img);
-
-                        if (!SetWindowSubclass(GetDlgItem(hWnd, buttonNumber), fieldActions, 0, buttonNumber))
-                        {
-                            DestroyWindow(hWnd);
-                        }
-
-                        buttons[buttonNumber] = btnHwnd;
-
-                        buttonNumber++;
-                    }
-                }
-
+                drawableField.update(true, fieldActions);
+                changeWindowPositionAndDimension();
                 checkItem(hWnd, IDM_DIFFICULTY_EASY);
                 break;
             case IDM_DIFFICULTY_MEDIUM:
                 //Code to set medium difficulty
+                field.generate(30, 30, 100);
+                drawableField.update(true, fieldActions);
+                changeWindowPositionAndDimension();
                 checkItem(hWnd, IDM_DIFFICULTY_MEDIUM);
                 break;
             case IDM_DIFFICULTY_HARD:
                 //Code to set hard difficulty
+                field.generate(40, 40, 200);
+                drawableField.update(true, fieldActions);
+                changeWindowPositionAndDimension();
                 checkItem(hWnd, IDM_DIFFICULTY_HARD);
                 break;
             case IDM_DIFFICULTY_CUSTOM:
@@ -289,6 +251,15 @@ INT_PTR CALLBACK Difficulty(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPara
             /*====================================*/
 
                 //HERE CODE ON CHANGE DIFFICULTY PARAMS!!!
+            wchar_t widthBuf[1024];
+            wchar_t heightBuf[1024];
+            GetWindowText(GetDlgItem(hDlg, IDC_EDITFIELD_WIDTH), widthBuf, 1024);
+            GetWindowText(GetDlgItem(hDlg, IDC_EDITFIELD_HEIGHT), heightBuf, 1024);
+            int width = _wtoi(widthBuf);
+            int height = _wtoi(heightBuf);
+            field.generate(width, height, width*height*0.1);
+            drawableField.update(true, fieldActions);
+            changeWindowPositionAndDimension();
 
             /*====================================*/
             EndDialog(hDlg, LOWORD(wParam));
@@ -308,20 +279,18 @@ LRESULT CALLBACK fieldActions(HWND btnHwnd, UINT message, WPARAM wParam, LPARAM 
     UINT_PTR uIdSubclass, DWORD_PTR dwRefData)
 {
     int x = dwRefData % field.getWidth(); //HAS TO BE DIVIDED BY ACTUAL FIELD WIDTH
-    int y = dwRefData / field.getHeight(); //HAS TO BE DIVIDED BY ACTUAL FIELD WIDTH
+    int y = dwRefData / field.getWidth(); //HAS TO BE DIVIDED BY ACTUAL FIELD WIDTH
     HBITMAP img = Const::images.at(Type::Types::EMPTY);
     
     switch (message)
     {
     case WM_LBUTTONDOWN:
         field.reveal(x, y);
-        for (int i = 0; i < field.getHeight(); ++i)
-        {
-            for (int j = 0; j < field.getWidth(); ++j)
-            {
-                SendMessage(buttons[i*field.getWidth() + j], BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)Const::images.at(field[i][j].getType()));
-            }
-        }
+        drawableField.update(false, fieldActions);
+        return TRUE;
+    case WM_RBUTTONDOWN:
+        field[y][x].changeFlag();
+        drawableField.update(false, fieldActions);
         return TRUE;
     case WM_NCDESTROY:
         RemoveWindowSubclass(btnHwnd, fieldActions, uIdSubclass);
@@ -340,4 +309,39 @@ void checkItem(HWND hWnd, int wmId)
     CheckMenuItem(GetMenu(hWnd), IDM_DIFFICULTY_CUSTOM, MF_BYCOMMAND | MF_UNCHECKED);
 
     CheckMenuItem(GetMenu(hWnd), wmId, MF_BYCOMMAND | MF_CHECKED);
+}
+
+void getDesktopResolution(int& width, int& height)
+{
+    RECT desktop;
+    const HWND hDesktop = GetDesktopWindow();
+    GetWindowRect(hDesktop, &desktop);
+    width = desktop.right;
+    height = desktop.bottom;
+}
+
+//Get preferred window width with this field
+int getWindowWidth()
+{
+    return 18 + Const::imgWidth * field.getWidth();
+}
+
+//Get preferred window height with this field
+int getWindowHeight()
+{
+    return 96 + Const::imgHeight * field.getHeight();
+}
+
+void changeWindowPositionAndDimension()
+{
+    int horizontal = 0;
+    int vertical = 0;
+    getDesktopResolution(horizontal, vertical);
+    //MoveWindow(GetDlgItem(hwnd, -1), get_window_width() / 2 - 22, 5, 26, 26, TRUE);
+    SetWindowPos(hWnd,
+        HWND_TOP,
+        horizontal / 2 - getWindowWidth() / 2,
+        vertical / 2 - getWindowHeight() / 2,
+        getWindowWidth(), getWindowHeight(),
+        SWP_SHOWWINDOW);
 }

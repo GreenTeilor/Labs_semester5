@@ -35,8 +35,8 @@ public:
 	void reveal(int x, int y);
 	void generate(int width, int height, int numMines);
 	std::vector<Cell>& operator[](const int index);
-	int getHeight();
-	int getWidth();
-	int getNumMines();
+	int getHeight() const;
+	int getWidth() const;
+	int getNumMines() const;
 };
 

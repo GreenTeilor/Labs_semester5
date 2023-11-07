@@ -37,7 +37,7 @@ Type Cell::getType()
 
 Type Cell::changeFlag()
 {
-	if (m_isOpened)
+	if (!m_isOpened)
 	{
 		if (m_cover == Type::Types::FLAG)
 		{
