@@ -11,8 +11,8 @@ private:
 		int x, y;
 	};
 
-	static std::random_device rd;
-	static std::mt19937 mersenne;
+	static inline std::random_device rd{};
+	static inline std::mt19937 mersenne{rd()};
 
 	std::vector<std::vector<Cell>> m_field;
 	bool m_isDeminingStarted;
@@ -37,5 +37,6 @@ public:
 	std::vector<Cell>& operator[](const int index);
 	int getHeight();
 	int getWidth();
+	int getNumMines();
 };
 

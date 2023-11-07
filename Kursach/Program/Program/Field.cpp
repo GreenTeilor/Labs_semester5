@@ -1,8 +1,5 @@
 #include "Field.h"
 
-std::random_device Field::rd{};
-std::mt19937 Field::mersenne{rd()};
-
 bool Field::outBounds(int x, int y)
 {
 	return (x < 0 || x > m_width - 1) || (y < 0 || y > m_height - 1);
@@ -13,21 +10,26 @@ Field::Field(int width, int height, int numMines)
 	generate(width, height, numMines);
 }
 
-bool Field::isGameEnded() {
+bool Field::isGameEnded() 
+{
 	return m_isGameOver;
 }
 
-bool Field::isDemined() {
+bool Field::isDemined() 
+{
 	return m_width * m_height - m_numMines == m_cellsRevealed;
 }
 
 int Field::generateInt(int min, int max)
 {
-	static const double fraction = 1.0 / (static_cast<double>(RAND_MAX) + 1.0);
-	return static_cast<int>(mersenne() * fraction * (max - min + 1) + min);
+	std::uniform_int_distribution<> dist(min, max);
+	return dist(mersenne);
+	//static const double fraction = 1.0 / (static_cast<double>(INT_MAX) + 1.0);
+	//return static_cast<int>(mersenne() * fraction * (max - min + 1) + min);
 }
 
-int Field::calcBombsNear(int x, int y) {
+int Field::calcBombsNear(int x, int y) 
+{
 	if (outBounds(x, y)) return 0;
 	int i = 0;
 	for (int offsetX = -1; offsetX <= 1; ++offsetX)
@@ -44,7 +46,8 @@ int Field::calcBombsNear(int x, int y) {
 	return i;
 }
 
-void Field::countBombsNearEachCell() {
+void Field::countBombsNearEachCell() 
+{
 	for (int i = 0; i < m_height; ++i)
 	{
 		for (int j = 0; j < m_width; ++j)
@@ -61,7 +64,8 @@ void Field::countBombsNearEachCell() {
 	}
 }
 
-void Field::moveAwayBomb(int x, int y) {
+void Field::moveAwayBomb(int x, int y) 
+{
 	if (m_field[y][x].getInner() != Type::Types::BOMB) return;
 
 	std::vector<Coordinates> notBombs;
@@ -87,7 +91,8 @@ void Field::moveAwayBomb(int x, int y) {
 	// so it's a waste of resources to do traversal through all cells
 }
 
-void Field::reveal(int x, int y) {
+void Field::reveal(int x, int y) 
+{
 	if (!m_isDeminingStarted && m_field[y][x].getInner() == Type::Types::BOMB) {
 		//Here logic to move bomb away and preferably to reserve some space near click(currently only move away mine implemented)
 		moveAwayBomb(x, y);
@@ -116,15 +121,18 @@ void Field::reveal(int x, int y) {
 	}
 }
 
-void Field::generate(int width, int height, int numMines) {
+void Field::generate(int width, int height, int numMines) 
+{
 	m_isDeminingStarted = false;
 	m_isGameOver = false;
 	this->m_numMines = numMines;
 	this->m_cellsRevealed = 0;
 	this->m_height = height;
 	this->m_width = width;
+	m_field.clear();
 	m_field.resize(height);
 	for (auto& row : m_field) {
+		row.clear();
 		row.resize(width);
 	}
 	int i = 0;
@@ -144,10 +152,17 @@ std::vector<Cell>& Field::operator[](const int index)
 	return m_field[index];
 }
 
-int Field::getHeight() {
+int Field::getHeight() 
+{
 	return m_height;
 }
 
-int Field::getWidth() {
+int Field::getWidth() 
+{
 	return m_width;
+}
+
+int Field::getNumMines()
+{
+	return m_numMines;
 }

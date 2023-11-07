@@ -1,7 +1,14 @@
 ﻿#include "framework.h"
 #include "Program.h"
+#include <map>
+#include <string>
+#include "Const.h"
+#include "Field.h"
 
 #define MAX_LOADSTRING 100
+
+Field field{ 10, 10, 20 };
+std::vector<HWND> buttons;
 
 // Глобальные переменные:
 HINSTANCE hInst;                                // текущий экземпляр
@@ -15,6 +22,8 @@ BOOL                InitInstance(HINSTANCE, int);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    Difficulty(HWND, UINT, WPARAM, LPARAM);
+LRESULT CALLBACK fieldActions(HWND hButton, UINT message, WPARAM wParam, LPARAM lParam, 
+    UINT_PTR uIdSubclass, DWORD_PTR dwRefData);
 void checkItem(HWND hWnd, int wmId);
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
@@ -26,6 +35,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     UNREFERENCED_PARAMETER(lpCmdLine);
 
     // TODO: Разместите код здесь.
+    Const::loadImages(); //Images load
 
     // Инициализация глобальных строк
     LoadStringW(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
@@ -37,6 +47,30 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     if (!InitInstance (hInstance, nCmdShow))
     {
         return FALSE;
+    }
+
+    //Field creation
+    int buttonNumber = 0;
+    buttons.resize(10 * 10);
+    for (int i = 0; i < 10; i++)
+    {
+        for (int j = 0; j < 10; j++)
+        {
+            HWND btnHwnd = CreateWindow(L"button", L"",
+                WS_CHILD | WS_VISIBLE | BS_BITMAP | BS_NOTIFY | BS_PUSHBUTTON,
+                1 + Const::imgWidth * j, 35 + Const::imgHeight * i, Const::imgWidth, Const::imgHeight, hWnd, (HMENU)buttonNumber, hInstance, 0);
+            HBITMAP img = Const::images.at(Type::Types::CLOSED);
+            SendMessage(btnHwnd, BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)img);
+
+            if (!SetWindowSubclass(GetDlgItem(hWnd, buttonNumber), fieldActions, 0, buttonNumber))
+            {
+                DestroyWindow(hWnd);
+            }
+
+            buttons[buttonNumber] = btnHwnd;
+
+            buttonNumber++;
+        }
     }
 
     HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_PROGRAM));
@@ -98,7 +132,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 {
    hInst = hInstance; // Сохранить маркер экземпляра в глобальной переменной
 
-   HWND hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
+   hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
       CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, nullptr, nullptr, hInstance, nullptr);
 
    if (!hWnd)
@@ -129,6 +163,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     case WM_COMMAND:
         {
             int wmId = LOWORD(wParam);
+            int buttonNumber = 0;
             // Разобрать выбор в меню:
             switch (wmId)
             {
@@ -136,11 +171,47 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 /*====================================*/
 
                 //HERE CODE ON NEW GAME CREATION!!!
-
+                field.generate(field.getWidth(), field.getHeight(), field.getNumMines());
+                for (int i = 0; i < field.getHeight(); ++i)
+                {
+                    for (int j = 0; j < field.getWidth(); ++j)
+                    {
+                        SendMessage(buttons[i * field.getWidth() + j], BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)Const::images.at(field[i][j].getType()));
+                    }
+                }
                 /*====================================*/
                 break;
             case IDM_DIFFICULTY_EASY:
                 //Code to set easy difficulty
+                for (auto& btn : buttons)
+                {
+                    DestroyWindow(btn);
+                }
+                buttons.clear();
+                field.generate(20, 20, 40);
+                buttons.resize(field.getWidth() * field.getHeight());
+                
+                for (int i = 0; i < 20; i++)
+                {
+                    for (int j = 0; j < 20; j++)
+                    {
+                        HWND btnHwnd = CreateWindow(L"button", L"",
+                            WS_CHILD | WS_VISIBLE | BS_BITMAP | BS_NOTIFY | BS_PUSHBUTTON,
+                            1 + Const::imgWidth * j, 35 + Const::imgHeight * i, Const::imgWidth, Const::imgHeight, hWnd, (HMENU)buttonNumber, hInst, 0);
+                        HBITMAP img = Const::images.at(Type::Types::CLOSED);
+                        SendMessage(btnHwnd, BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)img);
+
+                        if (!SetWindowSubclass(GetDlgItem(hWnd, buttonNumber), fieldActions, 0, buttonNumber))
+                        {
+                            DestroyWindow(hWnd);
+                        }
+
+                        buttons[buttonNumber] = btnHwnd;
+
+                        buttonNumber++;
+                    }
+                }
+
                 checkItem(hWnd, IDM_DIFFICULTY_EASY);
                 break;
             case IDM_DIFFICULTY_MEDIUM:
@@ -231,6 +302,34 @@ INT_PTR CALLBACK Difficulty(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPara
         break;
     }
     return (INT_PTR)FALSE;
+}
+
+LRESULT CALLBACK fieldActions(HWND btnHwnd, UINT message, WPARAM wParam, LPARAM lParam,
+    UINT_PTR uIdSubclass, DWORD_PTR dwRefData)
+{
+    int x = dwRefData % field.getWidth(); //HAS TO BE DIVIDED BY ACTUAL FIELD WIDTH
+    int y = dwRefData / field.getHeight(); //HAS TO BE DIVIDED BY ACTUAL FIELD WIDTH
+    HBITMAP img = Const::images.at(Type::Types::EMPTY);
+    
+    switch (message)
+    {
+    case WM_LBUTTONDOWN:
+        field.reveal(x, y);
+        for (int i = 0; i < field.getHeight(); ++i)
+        {
+            for (int j = 0; j < field.getWidth(); ++j)
+            {
+                SendMessage(buttons[i*field.getWidth() + j], BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)Const::images.at(field[i][j].getType()));
+            }
+        }
+        return TRUE;
+    case WM_NCDESTROY:
+        RemoveWindowSubclass(btnHwnd, fieldActions, uIdSubclass);
+        return DefSubclassProc(btnHwnd, message, wParam, lParam);
+    default:
+        return DefSubclassProc(btnHwnd, message, wParam, lParam);
+    }
+    
 }
 
 void checkItem(HWND hWnd, int wmId) 
