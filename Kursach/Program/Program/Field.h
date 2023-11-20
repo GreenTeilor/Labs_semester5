@@ -33,6 +33,7 @@ public:
 	void countBombsNearEachCell();
 	void moveAwayBomb(int x, int y);
 	void reveal(int x, int y);
+	void revealAll();
 	void generate(int width, int height, int numMines);
 	std::vector<Cell>& operator[](const int index);
 	int getHeight() const;

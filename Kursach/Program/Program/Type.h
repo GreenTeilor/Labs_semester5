@@ -9,8 +9,9 @@ public:
 	enum class Types
 	{
 		BOMB = -5, BOMB_BOOM, EMPTY, CLOSED, FLAG, WRONG_FLAG,
-		NUMBER_1, NUMBER_2, NUMBER_3, NUMBER_4, 
-		NUMBER_5, NUMBER_6, NUMBER_7, NUMBER_8
+		NUMBER_1, NUMBER_2, NUMBER_3, NUMBER_4,
+		NUMBER_5, NUMBER_6, NUMBER_7, NUMBER_8,
+		SMILE_HAPPY, SMILE_SHOCKED, SMILE_DEAD, SMILE_COOL
 	};
 
 private:
@@ -21,7 +22,7 @@ private:
 		{Types::EMPTY, "empty"},
 		{Types::CLOSED, "0"},
 		{Types::FLAG, "17"},
-		{Types::WRONG_FLAG, "17"},
+		{Types::WRONG_FLAG, "wrongFlag"},
 		{Types::NUMBER_1, "1"},
 		{Types::NUMBER_2, "2"},
 		{Types::NUMBER_3, "3"},
@@ -30,6 +31,10 @@ private:
 		{Types::NUMBER_6, "6"},
 		{Types::NUMBER_7, "7"},
 		{Types::NUMBER_8, "8"},
+		{Types::SMILE_HAPPY, "12"},
+		{Types::SMILE_SHOCKED, "14"},
+		{Types::SMILE_DEAD, "13"},
+		{Types::SMILE_COOL, "15"},
 	};
 	Types m_type;
 	std::string m_imagePath;

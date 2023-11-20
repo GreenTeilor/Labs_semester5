@@ -121,6 +121,21 @@ void Field::reveal(int x, int y)
 	}
 }
 
+void Field::revealAll()
+{
+	m_isGameOver = true;
+	for (int i = 0; i < m_height; ++i) {
+		for (int j = 0; j < m_width; ++j) {
+			if (m_field[i][j].getType() == Type::Types::FLAG && m_field[i][j].getInner() != Type::Types::BOMB) {
+				m_field[i][j].setCover(Type::Types::WRONG_FLAG);
+			}
+			else {
+				m_field[i][j].open();
+			}
+		}
+	}
+}
+
 void Field::generate(int width, int height, int numMines) 
 {
 	m_isDeminingStarted = false;

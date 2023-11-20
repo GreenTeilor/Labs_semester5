@@ -60,6 +60,11 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     drawableField.update(true, fieldActions);
     changeWindowPositionAndDimension();
 
+    //Smile creation
+    HWND hSmile = CreateWindowEx(0, L"BUTTON", L"", WS_CHILD | WS_VISIBLE | BS_BITMAP | BS_NOTIFY | BS_PUSHBUTTON,
+        getWindowWidth() / 2 - Const::smileWidth, Const::interfaceElementsTopGap, Const::smileWidth, Const::smileHeight, hWnd, (HMENU)IDM_SMILE, hInstance, 0);
+    SendMessage(hSmile, BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)Const::images.at(Type::Types::SMILE_HAPPY));
+
     HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_PROGRAM));
 
     MSG msg;
@@ -119,7 +124,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 {
    hInst = hInstance; // Сохранить маркер экземпляра в глобальной переменной
 
-   hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
+   hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPED | WS_SYSMENU | WS_MINIMIZEBOX,
       CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, nullptr, nullptr, hInstance, nullptr);
 
    if (!hWnd)
@@ -155,12 +160,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             switch (wmId)
             {
             case IDM_NEW:
+                SendMessage(GetDlgItem(hWnd, IDM_SMILE), BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)Const::images.at(Type::Types::SMILE_HAPPY));
                 /*====================================*/
 
                 //HERE CODE ON NEW GAME CREATION!!!
                 field.generate(field.getWidth(), field.getHeight(), field.getNumMines());
                 drawableField.update(false, fieldActions);
-                changeWindowPositionAndDimension();
                 /*====================================*/
                 break;
             case IDM_DIFFICULTY_EASY:
@@ -186,13 +191,18 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 break;
             case IDM_DIFFICULTY_CUSTOM:
                 DialogBox(hInst, MAKEINTRESOURCE(IDD_DIFFICULTYBOX), hWnd, Difficulty);
-                checkItem(hWnd, IDM_DIFFICULTY_CUSTOM);
                 break;
             case IDM_ABOUT:
                 DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
                 break; 
             case IDM_EXIT:
                 DestroyWindow(hWnd);
+                break;
+            case IDM_SMILE:
+                field.generate(field.getWidth(), field.getHeight(), field.getNumMines());
+                drawableField.update(false, fieldActions);
+                SendMessage(GetDlgItem(hWnd, IDM_SMILE), BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)Const::images.at(Type::Types::SMILE_HAPPY));
+                SetFocus(hWnd);
                 break;
             default:
                 return DefWindowProc(hWnd, message, wParam, lParam);
@@ -205,6 +215,23 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             HDC hdc = BeginPaint(hWnd, &ps);
             // TODO: Добавьте сюда любой код прорисовки, использующий HDC...
             EndPaint(hWnd, &ps);
+        }
+        break;
+    case WM_LBUTTONDOWN:
+        {
+            if (!field.isGameEnded()) 
+            {
+                SendMessage(GetDlgItem(hWnd, IDM_SMILE), BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)Const::images.at(Type::Types::SMILE_SHOCKED));
+            }
+        }
+        break;
+
+    case WM_LBUTTONUP:
+        {
+            if (!field.isGameEnded()) 
+            {
+                SendMessage(GetDlgItem(hWnd, IDM_SMILE), BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)Const::images.at(Type::Types::SMILE_HAPPY));
+            }
         }
         break;
     case WM_DESTROY:
@@ -262,6 +289,7 @@ INT_PTR CALLBACK Difficulty(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPara
             changeWindowPositionAndDimension();
 
             /*====================================*/
+            checkItem(hWnd, IDM_DIFFICULTY_CUSTOM);
             EndDialog(hDlg, LOWORD(wParam));
             return (INT_PTR)TRUE;
         }
@@ -285,7 +313,24 @@ LRESULT CALLBACK fieldActions(HWND btnHwnd, UINT message, WPARAM wParam, LPARAM 
     switch (message)
     {
     case WM_LBUTTONDOWN:
+        if (!field.isGameEnded()) {
+            SendMessage(GetDlgItem(hWnd, IDM_SMILE), BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)Const::images.at(Type::Types::SMILE_SHOCKED));
+        }
+        return TRUE;
+    case WM_LBUTTONUP:
+        if (field.isGameEnded()) {
+            return TRUE;
+        }
+        SendMessage(GetDlgItem(hWnd, IDM_SMILE), BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)Const::images.at(Type::Types::SMILE_HAPPY));
         field.reveal(x, y);
+        if (field[y][x].getInner() == Type::Types::BOMB && field[y][x].getCover() != Type::Types::FLAG) {
+            field.revealAll();
+            field[y][x].setInner(Type::Types::BOMB_BOOM);
+            SendMessage(GetDlgItem(hWnd, IDM_SMILE), BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)Const::images.at(Type::Types::SMILE_DEAD));
+        }
+        if (field.isDemined()) {
+            SendMessage(GetDlgItem(hWnd, IDM_SMILE), BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)Const::images.at(Type::Types::SMILE_COOL));
+        }
         drawableField.update(false, fieldActions);
         return TRUE;
     case WM_RBUTTONDOWN:
@@ -337,7 +382,7 @@ void changeWindowPositionAndDimension()
     int horizontal = 0;
     int vertical = 0;
     getDesktopResolution(horizontal, vertical);
-    //MoveWindow(GetDlgItem(hwnd, -1), get_window_width() / 2 - 22, 5, 26, 26, TRUE);
+    MoveWindow(GetDlgItem(hWnd, IDM_SMILE), getWindowWidth() / 2 - Const::smileWidth, Const::interfaceElementsTopGap, Const::smileWidth, Const::smileHeight, TRUE); //Move smile button
     SetWindowPos(hWnd,
         HWND_TOP,
         horizontal / 2 - getWindowWidth() / 2,
