@@ -3,6 +3,7 @@
 #include <map>
 #include <string>
 #include <stdlib.h>
+#include <regex>
 #include "Const.h"
 #include "Field.h"
 #include "DrawableField.h"
@@ -169,6 +170,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 /*====================================*/
                 break;
             case IDM_DIFFICULTY_EASY:
+                SendMessage(GetDlgItem(hWnd, IDM_SMILE), BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)Const::images.at(Type::Types::SMILE_HAPPY));
                 //Code to set easy difficulty
                 field.generate(20, 20, 40);
                 drawableField.update(true, fieldActions);
@@ -176,6 +178,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 checkItem(hWnd, IDM_DIFFICULTY_EASY);
                 break;
             case IDM_DIFFICULTY_MEDIUM:
+                SendMessage(GetDlgItem(hWnd, IDM_SMILE), BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)Const::images.at(Type::Types::SMILE_HAPPY));
                 //Code to set medium difficulty
                 field.generate(30, 30, 100);
                 drawableField.update(true, fieldActions);
@@ -183,6 +186,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 checkItem(hWnd, IDM_DIFFICULTY_MEDIUM);
                 break;
             case IDM_DIFFICULTY_HARD:
+                SendMessage(GetDlgItem(hWnd, IDM_SMILE), BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)Const::images.at(Type::Types::SMILE_HAPPY));
                 //Code to set hard difficulty
                 field.generate(40, 40, 200);
                 drawableField.update(true, fieldActions);
@@ -190,6 +194,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 checkItem(hWnd, IDM_DIFFICULTY_HARD);
                 break;
             case IDM_DIFFICULTY_CUSTOM:
+                SendMessage(GetDlgItem(hWnd, IDM_SMILE), BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)Const::images.at(Type::Types::SMILE_HAPPY));
                 DialogBox(hInst, MAKEINTRESOURCE(IDD_DIFFICULTYBOX), hWnd, Difficulty);
                 break;
             case IDM_ABOUT:
@@ -282,15 +287,24 @@ INT_PTR CALLBACK Difficulty(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPara
             wchar_t heightBuf[1024];
             GetWindowText(GetDlgItem(hDlg, IDC_EDITFIELD_WIDTH), widthBuf, 1024);
             GetWindowText(GetDlgItem(hDlg, IDC_EDITFIELD_HEIGHT), heightBuf, 1024);
-            int width = _wtoi(widthBuf);
-            int height = _wtoi(heightBuf);
-            field.generate(width, height, width*height*0.1);
-            drawableField.update(true, fieldActions);
-            changeWindowPositionAndDimension();
+            std::wregex digitsRegex{L"([0-9]+)"};
+            int width;
+            int height;
+            if (std::regex_match(std::wstring{ widthBuf }, digitsRegex) && std::regex_match(std::wstring{ heightBuf }, digitsRegex)
+                && (width = _wtoi(widthBuf)) <= 40 && (height = _wtoi(heightBuf)) <= 40)
+            {
+                field.generate(width, height, width * height * 0.1);
+                drawableField.update(true, fieldActions);
+                changeWindowPositionAndDimension();
 
-            /*====================================*/
-            checkItem(hWnd, IDM_DIFFICULTY_CUSTOM);
-            EndDialog(hDlg, LOWORD(wParam));
+                /*====================================*/
+                checkItem(hWnd, IDM_DIFFICULTY_CUSTOM);
+                EndDialog(hDlg, LOWORD(wParam));
+            }
+            else
+            {
+                MessageBox(hDlg, L"Хотя бы одно из значений больше 40 или не является числом", L"Ошибка", MB_OK);
+            }
             return (INT_PTR)TRUE;
         }
         else if (LOWORD(wParam) == IDCANCEL)

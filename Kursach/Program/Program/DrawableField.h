@@ -10,6 +10,7 @@ private:
 	HINSTANCE& m_hInst;
 	Field& m_field;
 	std::vector<HWND> m_buttons;
+	std::vector<HBITMAP> m_images;
 public:
 	DrawableField(Field& field, HWND& hWnd, HINSTANCE& hInst);
 	void update(bool isRecreateButtons, SUBCLASSPROC fieldActions);

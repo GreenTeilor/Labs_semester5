@@ -1,6 +1,6 @@
 #include "DrawableField.h"
 
-DrawableField::DrawableField(Field& field, HWND& hWnd, HINSTANCE& hInst) : m_field{ field }, m_hWnd{ hWnd }, m_hInst{ hInst }, m_buttons {}
+DrawableField::DrawableField(Field& field, HWND& hWnd, HINSTANCE& hInst) : m_field{ field }, m_hWnd{ hWnd }, m_hInst{ hInst }, m_buttons{}, m_images{}
 {
 
 }
@@ -16,6 +16,9 @@ void DrawableField::update(bool isRecreateButtons, SUBCLASSPROC fieldActions)
         }
         m_buttons.clear();
         m_buttons.resize(m_field.getWidth() * m_field.getHeight());
+
+        m_images.clear();
+        m_images.resize(m_field.getWidth() * m_field.getHeight());
 
         for (int i = 0; i < m_field.getHeight(); i++)
         {
@@ -34,6 +37,8 @@ void DrawableField::update(bool isRecreateButtons, SUBCLASSPROC fieldActions)
 
                 m_buttons[btnNumber] = btnHwnd;
 
+                m_images[btnNumber] = img;
+
                 ++btnNumber;
             }
         }
@@ -44,15 +49,19 @@ void DrawableField::update(bool isRecreateButtons, SUBCLASSPROC fieldActions)
         {
             for (int j = 0; j < m_field.getWidth(); ++j)
             {
-                SendMessage(m_buttons[i * m_field.getWidth() + j], BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)Const::images.at(m_field[i][j].getType()));
-                //BELOW IS SETTING REVEALED BUTTONS STYLE TO *PRESSED*, WHICH STANDS OUT UNREVEALED BUTTONS
-                //THIS IMPLEMENTATION TAKES INTO ACCOUNT ONLY DIFFERENCE BETWEEN REVEALED AND UNREVEALED BUTTON
-                //IF YOU WANT TO ADD SOME DIVERSITY YOU SHOULD ADD SOME std::map OR METHOD, WHICH SET STYLE ACCORDING TO 
-                //CELL TYPE
-                if (m_field[i][j].isOpened())
-                    SendMessage(m_buttons[i * m_field.getWidth() + j], BM_SETSTATE, TRUE, NULL);
-                else
-                    SendMessage(m_buttons[i * m_field.getWidth() + j], BM_SETSTATE, FALSE, NULL);
+                if (m_images[i * m_field.getWidth() + j] != Const::images.at(m_field[i][j].getType()))
+                {
+                    SendMessage(m_buttons[i * m_field.getWidth() + j], BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)Const::images.at(m_field[i][j].getType()));
+                    m_images[i * m_field.getWidth() + j] = Const::images.at(m_field[i][j].getType());
+                    //BELOW IS SETTING REVEALED BUTTONS STYLE TO *PRESSED*, WHICH STANDS OUT UNREVEALED BUTTONS
+                    //THIS IMPLEMENTATION TAKES INTO ACCOUNT ONLY DIFFERENCE BETWEEN REVEALED AND UNREVEALED BUTTON
+                    //IF YOU WANT TO ADD SOME DIVERSITY YOU SHOULD ADD SOME std::map OR METHOD, WHICH SET STYLE ACCORDING TO 
+                    //CELL TYPE
+                    if (m_field[i][j].isOpened())
+                        SendMessage(m_buttons[i * m_field.getWidth() + j], BM_SETSTATE, TRUE, NULL);
+                    else
+                        SendMessage(m_buttons[i * m_field.getWidth() + j], BM_SETSTATE, FALSE, NULL);
+                }
             }
         }
     }
