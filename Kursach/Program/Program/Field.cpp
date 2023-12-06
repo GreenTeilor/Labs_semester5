@@ -75,7 +75,7 @@ void Field::moveAwayBomb(int x, int y)
 		{
 			if (m_field[i][j].getInner() != Type::Types::BOMB)
 			{
-				notBombs.push_back({ i, j });
+				notBombs.push_back({ j, i });
 			}
 		}
 	}
@@ -103,7 +103,7 @@ void Field::reveal(int x, int y)
 		m_isDeminingStarted = true;
 		if (outBounds(x, y)) return;
 		if (m_field[y][x].isOpened()) return;
-		if (m_field[y][x].open()) {
+		if (m_field[y][x].open() && m_field[y][x].getInner() != Type::Types::BOMB) {
 			++m_cellsRevealed;
 		}
 		if (isDemined()) {

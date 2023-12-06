@@ -290,8 +290,12 @@ INT_PTR CALLBACK Difficulty(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPara
             std::wregex digitsRegex{L"([0-9]+)"};
             int width;
             int height;
+            int hDimension;
+            int vDimension;
+            getDesktopResolution(hDimension, vDimension);
             if (std::regex_match(std::wstring{ widthBuf }, digitsRegex) && std::regex_match(std::wstring{ heightBuf }, digitsRegex)
-                && (width = _wtoi(widthBuf)) <= 40 && (height = _wtoi(heightBuf)) <= 40)
+                && (width = _wtoi(widthBuf)) <= (hDimension - 18) / Const::imgWidth && (height = _wtoi(heightBuf)) <= (vDimension - 96 * 2) / Const::imgHeight
+                && width > 9 && height > 9)
             {
                 field.generate(width, height, width * height * 0.1);
                 drawableField.update(true, fieldActions);
@@ -303,7 +307,7 @@ INT_PTR CALLBACK Difficulty(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPara
             }
             else
             {
-                MessageBox(hDlg, L"Хотя бы одно из значений больше 40 или не является числом", L"Ошибка", MB_OK);
+                MessageBox(hDlg, L"Хотя бы одно из значений слишком велико или мало или не является числом", L"Ошибка", MB_OK);
             }
             return (INT_PTR)TRUE;
         }
