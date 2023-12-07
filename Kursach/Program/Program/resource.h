@@ -27,6 +27,7 @@
 #define IDM_DIFFICULTY_HARD             32779
 #define IDM_DIFFICULTY_CUSTOM           32780
 #define IDM_SMILE						32781 //Manually added
+#define ID_TIMER						32782 //Manually added
 #define IDC_STATIC                      -1
 
 // Next default values for new objects

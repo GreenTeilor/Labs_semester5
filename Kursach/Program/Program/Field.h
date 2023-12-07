@@ -28,6 +28,7 @@ public:
 	Field(int width, int height, int numMines);
 	bool isGameEnded();
 	bool isDemined();
+	bool isDeminingStarted();
 	int generateInt(int min, int max);
 	int calcBombsNear(int x, int y);
 	void countBombsNearEachCell();

@@ -18,6 +18,9 @@ WCHAR szWindowClass[MAX_LOADSTRING];            // имя класса глав�
 
 Field field{ 10, 10, 20 };
 DrawableField drawableField{ field, hWnd, hInst };
+int timer = 0;
+int flagsSet = 0;
+HBITMAP digitsBitmap;
 
 // Отправить объявления функций, включенных в этот модуль кода:
 ATOM                MyRegisterClass(HINSTANCE hInstance);
@@ -28,6 +31,7 @@ INT_PTR CALLBACK    Difficulty(HWND, UINT, WPARAM, LPARAM);
 LRESULT CALLBACK fieldActions(HWND hButton, UINT message, WPARAM wParam, LPARAM lParam, 
     UINT_PTR uIdSubclass, DWORD_PTR dwRefData);
 
+void resetStatistics(HWND hWnd);
 void checkItem(HWND hWnd, int wmId);
 void getDesktopResolution(int& width, int& height);
 int getWindowWidth();
@@ -44,6 +48,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
     // TODO: Разместите код здесь.
     Const::loadImages(); //Images load
+    digitsBitmap = Const::images.at(Type::Types::DIGITS);
 
     // Инициализация глобальных строк
     LoadStringW(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
@@ -56,6 +61,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     {
         return FALSE;
     }
+
+    SetTimer(hWnd, ID_TIMER, 1000, NULL);
 
     //Field creation
     drawableField.update(true, fieldActions);
@@ -161,6 +168,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             switch (wmId)
             {
             case IDM_NEW:
+                resetStatistics(hWnd);
                 SendMessage(GetDlgItem(hWnd, IDM_SMILE), BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)Const::images.at(Type::Types::SMILE_HAPPY));
                 /*====================================*/
 
@@ -170,6 +178,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 /*====================================*/
                 break;
             case IDM_DIFFICULTY_EASY:
+                resetStatistics(hWnd);
                 SendMessage(GetDlgItem(hWnd, IDM_SMILE), BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)Const::images.at(Type::Types::SMILE_HAPPY));
                 //Code to set easy difficulty
                 field.generate(20, 20, 40);
@@ -178,6 +187,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 checkItem(hWnd, IDM_DIFFICULTY_EASY);
                 break;
             case IDM_DIFFICULTY_MEDIUM:
+                resetStatistics(hWnd);
                 SendMessage(GetDlgItem(hWnd, IDM_SMILE), BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)Const::images.at(Type::Types::SMILE_HAPPY));
                 //Code to set medium difficulty
                 field.generate(30, 30, 100);
@@ -186,6 +196,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 checkItem(hWnd, IDM_DIFFICULTY_MEDIUM);
                 break;
             case IDM_DIFFICULTY_HARD:
+                resetStatistics(hWnd);
                 SendMessage(GetDlgItem(hWnd, IDM_SMILE), BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)Const::images.at(Type::Types::SMILE_HAPPY));
                 //Code to set hard difficulty
                 field.generate(40, 40, 200);
@@ -194,7 +205,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 checkItem(hWnd, IDM_DIFFICULTY_HARD);
                 break;
             case IDM_DIFFICULTY_CUSTOM:
-                SendMessage(GetDlgItem(hWnd, IDM_SMILE), BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)Const::images.at(Type::Types::SMILE_HAPPY));
                 DialogBox(hInst, MAKEINTRESOURCE(IDD_DIFFICULTYBOX), hWnd, Difficulty);
                 break;
             case IDM_ABOUT:
@@ -204,6 +214,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 DestroyWindow(hWnd);
                 break;
             case IDM_SMILE:
+                resetStatistics(hWnd);
                 field.generate(field.getWidth(), field.getHeight(), field.getNumMines());
                 drawableField.update(false, fieldActions);
                 SendMessage(GetDlgItem(hWnd, IDM_SMILE), BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)Const::images.at(Type::Types::SMILE_HAPPY));
@@ -214,11 +225,36 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             }
         }
         break;
+    case WM_TIMER:
+        {
+            if (field.isDeminingStarted() && !field.isGameEnded() && timer < 999)
+            {
+                ++timer;
+                InvalidateRect(hWnd, NULL, FALSE);
+            }
+        }
+        break;
     case WM_PAINT:
         {
             PAINTSTRUCT ps;
             HDC hdc = BeginPaint(hWnd, &ps);
-            // TODO: Добавьте сюда любой код прорисовки, использующий HDC...
+            HDC hdcBitmap = CreateCompatibleDC(hdc);
+
+            digitsBitmap = (HBITMAP)SelectObject(hdcBitmap, digitsBitmap);
+
+            //For timer
+            BitBlt(hdc, getWindowWidth() - 69, 6, 15, 23, hdcBitmap, 17 * ((timer / 100) % 10) + 1, 0, SRCCOPY);
+            BitBlt(hdc, getWindowWidth() - 54, 6, 15, 23, hdcBitmap, 17 * ((timer / 10) % 10) + 1, 0, SRCCOPY);
+            BitBlt(hdc, getWindowWidth() - 39, 6, 15, 23, hdcBitmap, 17 * (timer % 10) + 1, 0, SRCCOPY);
+
+            //For mines to mark left
+            int flagsLeftToSet = ((field.getNumMines() - flagsSet) > 0) ? (field.getNumMines() - flagsSet) : 0;
+            BitBlt(hdc, 7, 6, 15, 23, hdcBitmap, 17 * ((flagsLeftToSet / 100) % 10) + 1, 0, SRCCOPY);
+            BitBlt(hdc, 22, 6, 15, 23, hdcBitmap, 17 * ((flagsLeftToSet / 10) % 10) + 1, 0, SRCCOPY);
+            BitBlt(hdc, 37, 6, 15, 23, hdcBitmap, 17 * (flagsLeftToSet % 10) + 1, 0, SRCCOPY);
+
+            digitsBitmap = (HBITMAP)SelectObject(hdcBitmap, digitsBitmap);
+            DeleteDC(hdcBitmap);
             EndPaint(hWnd, &ps);
         }
         break;
@@ -240,6 +276,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         }
         break;
     case WM_DESTROY:
+        KillTimer(hWnd, ID_TIMER);
         PostQuitMessage(0);
         break;
     default:
@@ -280,6 +317,8 @@ INT_PTR CALLBACK Difficulty(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPara
     case WM_COMMAND:
         if (LOWORD(wParam) == IDOK)
         {
+            resetStatistics(hWnd);
+            SendMessage(GetDlgItem(hWnd, IDM_SMILE), BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)Const::images.at(Type::Types::SMILE_HAPPY));
             /*====================================*/
 
                 //HERE CODE ON CHANGE DIFFICULTY PARAMS!!!
@@ -352,7 +391,15 @@ LRESULT CALLBACK fieldActions(HWND btnHwnd, UINT message, WPARAM wParam, LPARAM 
         drawableField.update(false, fieldActions);
         return TRUE;
     case WM_RBUTTONDOWN:
-        field[y][x].changeFlag();
+        if (field[y][x].changeFlag() == Type::Types::FLAG)
+        {
+            ++flagsSet;
+        }
+        else if (!field[y][x].isOpened())
+        {
+            --flagsSet;
+        }
+        InvalidateRect(hWnd, NULL, FALSE);
         drawableField.update(false, fieldActions);
         return TRUE;
     case WM_NCDESTROY:
@@ -362,6 +409,13 @@ LRESULT CALLBACK fieldActions(HWND btnHwnd, UINT message, WPARAM wParam, LPARAM 
         return DefSubclassProc(btnHwnd, message, wParam, lParam);
     }
     
+}
+
+void resetStatistics(HWND hWnd)
+{
+    timer = 0;
+    flagsSet = 0;
+    InvalidateRect(hWnd, NULL, FALSE);
 }
 
 void checkItem(HWND hWnd, int wmId) 
